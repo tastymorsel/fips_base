@@ -6,6 +6,13 @@
 #include "sokol_time.h"
 #include "imgui.h"
 
+extern "C"
+{
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
+
 /* even though we use 16-bit indices, the vertex buffer may hold
     more then 64k vertices, because it will be rendered with
     in chunks via buffer offsets
@@ -31,6 +38,33 @@ static void draw_imgui(ImDrawData*);
 
 extern const char* vs_src;
 extern const char* fs_src;
+
+#define	LUA_GNAME	"_G"
+
+static const luaL_Reg loadedlibs[] = {
+	{ LUA_GNAME, luaopen_base },
+	{ LUA_LOADLIBNAME, luaopen_package },
+	{ LUA_COLIBNAME, luaopen_coroutine },
+	{ LUA_TABLIBNAME, luaopen_table },
+	{ LUA_IOLIBNAME, luaopen_io },
+	{ LUA_OSLIBNAME, luaopen_os },
+	{ LUA_STRLIBNAME, luaopen_string },
+	{ LUA_MATHLIBNAME, luaopen_math },
+	{ LUA_UTF8LIBNAME, luaopen_utf8 },
+	{ LUA_DBLIBNAME, luaopen_debug },
+	{ NULL, NULL }
+};
+
+
+LUALIB_API void luaL_openlibs(lua_State *L) {
+	const luaL_Reg *lib;
+	/* "require" functions from 'loadedlibs' and set results to global table */
+	for (lib = loadedlibs; lib->func; lib++) {
+		luaL_requiref(L, lib->name, lib->func, 1);
+		lua_pop(L, 1);  /* remove lib */
+	}
+}
+
 
 void init(void) {
     // setup sokol-gfx and sokol-time
@@ -139,6 +173,12 @@ void init(void) {
     pass_action.colors[0].val[1] = 0.5f;
     pass_action.colors[0].val[2] = 0.7f;
     pass_action.colors[0].val[3] = 1.0f;
+
+		lua_State *L = luaL_newstate();   /* opens Lua */
+		luaL_openlibs(L);
+		char *buff = "print(\"Hello World\")";
+		luaL_loadbuffer(L, buff, strlen(buff), "line") ||
+                lua_pcall(L, 0, 0, 0);
 }
 
 void frame(void) {

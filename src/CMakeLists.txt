@@ -43,5 +43,5 @@ fips_end_lib()
 
 fips_begin_app(hello windowed)
     fips_files(test.cc)
-		fips_deps(sokol imgui)
+		fips_deps(sokol imgui lua libmodplug)
 fips_end_app()

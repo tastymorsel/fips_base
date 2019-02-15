@@ -11,6 +11,8 @@ imports:
     git: https://github.com/fips-libs/fips-glfw
   fips-imgui:
     git: https://github.com/fips-libs/fips-imgui.git
+  fips-lua:
+    git: https://github.com/floooh/fips-lua
   fips-libmodplug:
     git: https://github.com/fips-libs/fips-libmodplug
 #   imports:
